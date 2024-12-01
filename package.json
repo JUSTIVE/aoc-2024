@@ -1,0 +1,23 @@
+{
+  "name": "aoc-2024",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "res:build": "rescript",
+    "res:clean": "rescript clean",
+    "res:dev": "rescript -w",
+    "go": "bun --silent run ./src/Runner.res.mjs"
+  },
+  "dependencies": {
+    "@rescript/core": "1.6.1",
+    "rescript": "11.1.4",
+    "rescript-bun": "^0.5.0",
+    "rescript-nodejs": "^16.1.0"
+  }
+}
