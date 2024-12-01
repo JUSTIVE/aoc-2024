@@ -1,5 +1,9 @@
+open Utilities
+
+let data = RescriptBun.Fs.readFileSync("./src/Day1.txt")->Buffer.toString
+
 let parseLine = str =>
-  switch String.split(str, "   ")->Array.map(x => x->Int.fromString(~radix=10)) {
+  switch String.split(str, "   ")->Array.map(x => Int.fromString(x, ~radix=10)) {
   | [Some(a), Some(b)] => Some((a, b))
   | _ => None
   }
@@ -10,25 +14,19 @@ let parseFile = data =>
   ->List.fromArray
   ->List.unzip
 
-let data = RescriptBun.Fs.readFileSync("./src/Day1.txt")->Buffer.toString
-
+let parsed = parseFile(data)
 let (lista, listb) = parseFile(data)
-let polish = x => List.sort(x, Int.compare)
+let (sorteda, sortedb) = Tuple2_.map(parsed, List_.Int.sort)
 
-let listBHistogram = Utilities.histogram(listb)
+let listBCounts = List_.histogram(listb)->Map_.map(List.length)
 
 let q1 =
-  List.zip(polish(lista), polish(listb))
-  ->List.map(((a, b)) => Utilities.intDiff(a, b))
-  ->Utilities.sum
+  List.zip(sorteda, sortedb)
+  ->List.map(Tuple2_.Int.diff)
+  ->List_.Int.sum
   ->Int.toString
 
 let q2 =
-  lista
-  ->List.filterMap(x =>
-    listBHistogram
-    ->Map.get(x)
-    ->Option.map(y => List.length(y) * x)
-  )
-  ->Utilities.sum
+  List.filterMap(lista, x => Map.get(listBCounts, x)->Option.map(y => y * x))
+  ->List_.Int.sum
   ->Int.toString

@@ -7,11 +7,11 @@ let runner = (day, problem) =>
   | _ => "Invalid day or problem"
   }
 
-switch argv(process)->Array.at(2) {
-| Some(arg) =>
+Array.at(argv(process), 2)
+->Option.mapOr("No argument provided", arg =>
   switch String.split(arg, "-")->Array.map(x => x->Int.fromString(~radix=10)) {
   | [Some(day), Some(problem)] => runner(day, problem)
   | _ => "Invalid argument"
   }
-| None => "No argument provided"
-}->Js.log
+)
+->Js.log

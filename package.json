@@ -12,7 +12,7 @@
     "res:build": "rescript",
     "res:clean": "rescript clean",
     "res:dev": "rescript -w",
-    "go": "bun --silent run ./src/Runner.res.mjs"
+    "go": "bun --silent run ./src/Runner.res"
   },
   "dependencies": {
     "@rescript/core": "1.6.1",
