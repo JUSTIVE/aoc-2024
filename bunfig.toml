@@ -1,1 +1,1 @@
-preload = ["./bun-resc.js"]
+preload = ["./bun-resc.ts"]

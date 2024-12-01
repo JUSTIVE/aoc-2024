@@ -17,7 +17,6 @@ let parseFile = data =>
 let parsed = parseFile(data)
 let (lista, listb) = parseFile(data)
 let (sorteda, sortedb) = Tuple2_.map(parsed, List_.Int.sort)
-
 let listBCounts = List_.histogram(listb)->Map_.map(List.length)
 
 let q1 =
