@@ -23,6 +23,8 @@ module List_ = {
         ->Option.mapOr(list{x}, y => List.add(y, x)),
       )
     )
+  let diagonalRemovedPermutations = x =>
+    List.mapWithIndex(x, (_, i) => x->List.filterWithIndex((_, j) => i != j))
 
   module Int = {
     let sum = a => List.reduce(a, 0, (a, b) => a + b)
@@ -34,8 +36,21 @@ module List_ = {
 
 module Tuple2_ = {
   let map = ((a, b), f) => (f(a), f(b))
+  let fold = ((a, b), f) => f(a, b)
   module Int = {
     let diffAbs = ((a, b)) => Js.Math.abs_int(a - b)
     let diff = ((a, b)) => a - b
+    let add = ((a, b)) => a + b
   }
+}
+
+module Int_ = {
+  let parse = x => Int.fromString(x, ~radix=10)
+}
+
+module String_ = {
+  let toIntList = x =>
+    String.splitByRegExp(x, %re("/\s+/"))
+    ->Array.filterMap(x => Option.flatMap(x, Int_.parse))
+    ->List.fromArray
 }

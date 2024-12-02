@@ -177,3 +177,4 @@ dist
 /lib/
 .bsb.lock
 **/*.res.mjs
+**/*.txt

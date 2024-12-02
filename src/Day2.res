@@ -1,25 +1,35 @@
 open Utilities
 
-let parseLine = line =>
-  String.split(line, " ")
-  ->Array.map(x => Int.fromString(x, ~radix=10))
-  ->Array.map(Option.getUnsafe)
-  ->List.fromArray
+let parseLine = line => String_.toIntList(line)
 
-let parseFile = data => String.split(data, "\n")->Array.map(parseLine)
+let parseFile = data =>
+  String.split(data, "\n")
+  ->Array.filter(x => x != "")
+  ->Array.map(parseLine)
+
+let checkCase = x => {
+  let window = List_.Int.slidingWindow(x)->List.map(Tuple2_.Int.diff)
+  List.every(window, x => Js.Math.abs_int(x) <= 3) &&
+  List.map(window, x => Js.Math.sign_int(x))
+  ->List_.Int.sum
+  ->Js.Math.abs_int == List.length(x) - 1
+}
 
 let q1 = data => {
-  let parsed = parseFile(data)
-  let checkCase = x => {
-    let windows1 = List_.Int.slidingWindow(x)->List.map(Tuple2_.Int.diff)
+  parseFile(data)
+  ->Array.filter(checkCase)
+  ->Array.length
+  ->Int.toString
+}
 
-    // windows->List.toArray->Js.log
-    // windows->List.map(x => Js.Math.sign_int(x))->List_.Int.sum->Js.log
-    // Js.log2(windows->List.length - 1, "")
+let q2 = data => {
+  let (passed, failed) =
+    parseFile(data)
+    ->List.fromArray
+    ->List.partition(checkCase)
 
-    windows1->List.every(x => Js.Math.abs_int(x) <= 2) &&
-      windows1->List.map(x => Js.Math.sign_int(x))->List_.Int.sum->Js.Math.abs_int ==
-        x->List.length - 1
-  }
-  parsed->Array.filter(checkCase)->Array.length->Int.toString
+  (passed, List.filter(failed, x => List_.diagonalRemovedPermutations(x)->List.some(checkCase)))
+  ->Tuple2_.map(List.length)
+  ->Tuple2_.Int.add
+  ->Int.toString
 }

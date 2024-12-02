@@ -1,4 +1,4 @@
-let getData = async day => {
+let getData = async (day, session) => {
   let fileName = `./src/Day${day->Int.toString}.txt`
 
   if RescriptBun.Fs.existsSync(fileName) {
@@ -8,14 +8,7 @@ let getData = async day => {
       await RescriptBun.Globals.fetch(
         `https://adventofcode.com/2024/day/${day->Int.toString}/input`,
         ~init={
-          headers: Globals.HeadersInit.FromArray([
-            (
-              "Cookie",
-              `session=${RescriptBun.Bun.Env.get(RescriptBun.Bun.env, "SESSION")->Option.getOr(
-                  "",
-                )}`,
-            ),
-          ]),
+          headers: Globals.HeadersInit.FromArray([("Cookie", `session=${session}`)]),
         },
       ),
     )
