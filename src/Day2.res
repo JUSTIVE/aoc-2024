@@ -19,17 +19,15 @@ let q1 = data => {
   parseFile(data)
   ->Array.filter(checkCase)
   ->Array.length
-  ->Int.toString
 }
 
 let q2 = data => {
-  let (passed, failed) =
-    parseFile(data)
-    ->List.fromArray
-    ->List.partition(checkCase)
-
-  (passed, List.filter(failed, x => List_.diagonalRemovedPermutations(x)->List.some(checkCase)))
+  parseFile(data)
+  ->List.fromArray
+  ->List.partition(checkCase)
+  ->Tuple2_.mapSnd(snd =>
+    List.filter(snd, x => List_.diagonalRemovedPermutations(x)->List.some(checkCase))
+  )
   ->Tuple2_.map(List.length)
-  ->Tuple2_.Int.add
-  ->Int.toString
+  ->Tuple2_.Int.sum
 }

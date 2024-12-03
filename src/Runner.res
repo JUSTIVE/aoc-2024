@@ -2,13 +2,17 @@ open NodeJs.Process
 open Utilities
 
 let runner = async (day, problem, session) => {
-  (await DataSupply.getData(day, session))->switch (day, problem) {
-  | (1, 1) => Day1.q1
-  | (1, 2) => Day1.q2
-  | (2, 1) => Day2.q1
-  | (2, 2) => Day2.q2
-  | _ => _ => "Invalid day or problem"
+  (await DataSupply.getData(day, session))
+  ->switch (day, problem) {
+  | (1, 1) => x => Some(Day1.q1(x))
+  | (1, 2) => x => Some(Day1.q2(x))
+  | (2, 1) => x => Some(Day2.q1(x))
+  | (2, 2) => x => Some(Day2.q2(x))
+  | (3, 1) => x => Some(Day3.q1(x))
+  | (3, 2) => x => Some(Day3.q2(x))
+  | _ => _ => None
   }
+  ->Option.mapOr("Invalid day or problem", Int_.toString)
 }
 
 let driver = async arg =>

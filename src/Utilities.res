@@ -12,6 +12,12 @@ module Map_ = {
   }
 }
 
+module Array_ = {
+  module Int = {
+    let sum = a => Array.reduce(a, 0, (a, b) => a + b)
+  }
+}
+
 module List_ = {
   let histogram = (a: List.t<'a>) =>
     List.reduce(a, Map.make(), (acc, x) =>
@@ -37,15 +43,18 @@ module List_ = {
 module Tuple2_ = {
   let map = ((a, b), f) => (f(a), f(b))
   let fold = ((a, b), f) => f(a, b)
+  let mapSnd = ((a, b), f) => (a, f(b))
+  let toList = ((a, b)) => List.zip(a, b)
   module Int = {
     let diffAbs = ((a, b)) => Js.Math.abs_int(a - b)
     let diff = ((a, b)) => a - b
-    let add = ((a, b)) => a + b
+    let sum = ((a, b)) => a + b
   }
 }
 
 module Int_ = {
   let parse = x => Int.fromString(x, ~radix=10)
+  let toString = x => Int.toString(x, ~radix=10)
 }
 
 module String_ = {
