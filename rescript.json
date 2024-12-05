@@ -2,7 +2,8 @@
   "uncurried": true,
   "name": "aoc-2024",
   "sources": {
-    "dir": "src"
+    "dir": "src",
+    "subdirs":true
   },
   "package-specs": {
     "module": "esmodule",

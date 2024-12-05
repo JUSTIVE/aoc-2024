@@ -1,23 +1,34 @@
 open NodeJs.Process
 open Utilities
 
-let runner = async (day, problem, session) => {
-  (await DataSupply.getData(day, session))
-  ->switch (day, problem) {
-  | (1, 1) => x => Some(Day1.q1(x))
-  | (1, 2) => x => Some(Day1.q2(x))
-  | (2, 1) => x => Some(Day2.q1(x))
-  | (2, 2) => x => Some(Day2.q2(x))
-  | (3, 1) => x => Some(Day3.q1(x))
-  | (3, 2) => x => Some(Day3.q2(x))
-  | _ => _ => None
-  }
-  ->Option.mapOr("Invalid day or problem", Int_.toString)
+let runner = async (year, day, problem, session) => {
+  let data = await DataSupply.getData(year, day, session)
+  switch year {
+  | 2022 =>
+    switch (day, problem) {
+    | (2, 1) => Some(Day2_2022.q1)
+    | (2, 2) => Some(Day2_2022.q2)
+    | (3, 1) => Some(Day3_2022.q1)
+    | _ => None
+    }
+  | 2024 =>
+    switch (day, problem) {
+    | (1, 1) => Some(Day1_2024.q1)
+    | (1, 2) => Some(Day1_2024.q2)
+    | (2, 1) => Some(Day2_2024.q1)
+    | (2, 2) => Some(Day2_2024.q2)
+    | (3, 1) => Some(Day3_2024.q1)
+    | (3, 2) => Some(Day3_2024.q2)
+    | _ => None
+    }
+  | _ => None
+  }->Option.mapOr("Invalid day or problem", x => x(data)->Int_.toString)
 }
 
 let driver = async arg =>
   switch (String.split(arg, "-")->Array.map(Int_.parse), Bun.Env.get(Bun.env, "SESSION")) {
-  | ([Some(day), Some(problem)], Some(session)) => await runner(day, problem, session)
+  | ([Some(year), Some(day), Some(problem)], Some(session)) =>
+    await runner(year, day, problem, session)
   | (_, None) => "Invalid session"
   | _ => "Invalid argument"
   }
