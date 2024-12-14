@@ -1,4 +1,8 @@
 let identity = x => x
+let monitor = x => {
+  Js.log(x)
+  x
+}
 
 module Map_ = {
   let map = (a, f) =>
