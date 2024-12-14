@@ -4,6 +4,12 @@ let monitor = x => {
   x
 }
 
+let is = x => y => x == y
+module Bool = {
+  type t = bool
+  let negate = x => !x
+}
+
 module Map_ = {
   let map = (a, f) =>
     Map.entries(a)
@@ -19,6 +25,8 @@ module Map_ = {
 module Array_ = {
   module Int = {
     let sum = a => Array.reduce(a, 0, (a, b) => a + b)
+    let sortAsc = a => Array.toSorted(a, Core__Int.compare)
+    let sortDesc = a => sortAsc(a)->Array.toReversed
   }
 }
 
