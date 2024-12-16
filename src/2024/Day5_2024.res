@@ -13,7 +13,6 @@ module Rule = {
 
 module RuleSet = {
   type t = array<Rule.t>
-
   let has = (rules, rule) => Array.some(rules, is(rule))
 }
 
@@ -29,15 +28,16 @@ module Case = {
     | (preI, postI) => preI < postI
     }
   }
+  let isRelevantRule = (case, (pre, post)) =>
+    switch (case->Array.findIndex(is(pre)), case->Array.findIndex(is(post))) {
+    | (-1, -1)
+    | (_, -1)
+    | (-1, _) => false
+    | _ => true
+    }
+
   let fix = (case, rules) => {
-    let rules = rules->Array.filter(((pre, post)) =>
-      switch (case->Array.findIndex(is(pre)), case->Array.findIndex(is(post))) {
-      | (-1, -1)
-      | (_, -1)
-      | (-1, _) => false
-      | _ => true
-      }
-    )
+    let rules = rules->Array.filter(x => isRelevantRule(case, x))
 
     let list{(a, b), ...tail} =
       rules
@@ -51,26 +51,21 @@ module Case = {
       )
       ->List.fromArray
 
-    let sortByJoinable = (state, lists) => {
-      let (x, y) = lists->List.partition(((a, b)) => {
+    let sortByJoinable = (state, lists) =>
+      lists
+      ->List.partition(((a, b)) => {
         Array.at(state, 0) == Some(b) || Array.at(state, -1) == Some(a)
       })
-      list{...x, ...y}
-    }
+      ->Tuple2_.List.join
 
-    let rec combine = (state, neighbourNumbers: list<(int, int)>) => {
+    let rec combine = (state, neighbourNumbers: list<(int, int)>) =>
       switch neighbourNumbers {
       | list{(a, b), ...tail} =>
-        Array.at(state, 0) == Some(b)
-          ? combine([a, ...state], sortByJoinable([a, ...state], tail))
-          : combine([...state, b], sortByJoinable([...state, b], tail))
+        let newState = Array.at(state, 0) == Some(b) ? [a, ...state] : [...state, b]
+        combine(newState, sortByJoinable(newState, tail))
       | _ => state
       }
-    }
-    let (x, y) = tail->List.partition(((a_, b_)) => {
-      a == b_ || b == a_
-    })
-    combine([a, b], sortByJoinable([a, b], list{...x, ...y}))
+    combine([a, b], sortByJoinable([a, b], tail))
   }
 }
 
@@ -78,7 +73,7 @@ let parseRuleSet = file => file->String.split("\n")->Array.filterMap(Rule.fromSt
 
 let parseFile = file => {
   let [a, b] = file->String.split("\n\n")
-  let rules = a->parseRuleSet
+  let rules = parseRuleSet(a)
   let cases = b->String.split("\n")->Array.map(Case.fromString)
 
   (rules, cases)
@@ -97,9 +92,8 @@ let q1 = data => {
 
 let q2 = data => {
   let (rules, cases) = data->parseFile
-
   cases
-  ->Array.filter(case => rules->Array.every(rule => Case.validate(case, rule))->Bool.negate)
+  ->Array_.reject(case => rules->Array.every(rule => Case.validate(case, rule)))
   ->Array.map(x => x->Case.fix(rules))
   ->Array.filterMap(Case.selectMiddleValue)
   ->Array_.Int.sum

@@ -28,6 +28,7 @@ module Array_ = {
     let sortAsc = a => Array.toSorted(a, Core__Int.compare)
     let sortDesc = a => sortAsc(a)->Array.toReversed
   }
+  let reject = (a, f) => Array.filter(a, x => !f(x))
 }
 
 module List_ = {
@@ -61,6 +62,9 @@ module Tuple2_ = {
     let diffAbs = ((a, b)) => Js.Math.abs_int(a - b)
     let diff = ((a, b)) => a - b
     let sum = ((a, b)) => a + b
+  }
+  module List = {
+    let join = ((a, b)) => list{...a, ...b}
   }
 }
 
