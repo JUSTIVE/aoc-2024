@@ -22,6 +22,13 @@ module Map_ = {
   }
 }
 
+module Set_ = {
+  let update = (s, v) => {
+    let x = Set.toArray(s)
+    Set.fromArray([...x, v])
+  }
+}
+
 module Array_ = {
   module Int = {
     let sum = a => Array.reduce(a, 0, (a, b) => a + b)

@@ -1,19 +1,20 @@
+open Utilities
 module Direction = {
-  type t = Left | Right | Up | Down
+  type t = [#Left | #Right | #Up | #Down]
   let fromString = x =>
     switch x {
-    | "^" => Some(Up)
-    | ">" => Some(Right)
-    | "<" => Some(Left)
-    | "v" => Some(Down)
+    | "^" => Some(#Up)
+    | ">" => Some(#Right)
+    | "<" => Some(#Left)
+    | "v" => Some(#Down)
     | _ => None
     }
   let turnRight = dir =>
     switch dir {
-    | Up => Right
-    | Right => Down
-    | Down => Left
-    | Left => Up
+    | #Up => #Right
+    | #Right => #Down
+    | #Down => #Left
+    | #Left => #Up
     }
 }
 
@@ -22,16 +23,16 @@ module Guard = {
 
   let walk = (((x, y), dir): t) => {
     switch dir {
-    | Up => (x, y - 1)
-    | Down => (x, y + 1)
-    | Left => (x - 1, y)
-    | Right => (x + 1, y)
+    | #Up => (x, y - 1)
+    | #Down => (x, y + 1)
+    | #Left => (x - 1, y)
+    | #Right => (x + 1, y)
     }
   }
-  let turn = ((x, y), dir) => ((x, y), Direction.turnRight(dir))
+  let turn = (((x, y), dir)) => ((x, y), Direction.turnRight(dir))
 }
 
-module Map = {
+module World = {
   type t = {
     walls: array<((int, int), string)>,
     height: int,
@@ -87,20 +88,20 @@ module Map = {
 }
 
 let q1 = data => {
-  let rec march = (history, map: Map.t) => {
-    let ((x, y), dir) = map.guard
+  let rec march = (history, map: World.t) => {
+    let (_, dir) = map.guard
     let newHistory = history->List.add(map.guard)
     let nextMove = Guard.walk(map.guard)
 
-    switch (Map.boundaryCheck(map, nextMove), Map.isWall(map, nextMove)) {
+    switch (World.boundaryCheck(map, nextMove), World.isWall(map, nextMove)) {
     | (false, _) => newHistory
-    | (_, true) => march(newHistory, Map.updateGuard(map, ((x, y), Direction.turnRight(dir))))
-    | (_, false) => march(newHistory, Map.updateGuard(map, (nextMove, dir)))
+    | (_, true) => march(newHistory, World.updateGuard(map, Guard.turn(map.guard)))
+    | (_, false) => march(newHistory, World.updateGuard(map, (nextMove, dir)))
     }
   }
 
   data
-  ->Map.fromString
+  ->World.fromString
   ->Option.mapOr(0, map =>
     march(list{}, map)
     ->List.toArray
@@ -111,30 +112,47 @@ let q1 = data => {
 }
 
 let q2 = data => {
-  let rec loopCheck = (history, map: Map.t) => {
+  let rec loopCheck = (
+    history: Core__Map.t<int, Core__Map.t<int, list<Direction.t>>>,
+    map: World.t,
+  ) => {
     let ((x, y), dir) = map.guard
-    let newHistory = history->List.add(map.guard)
     let nextMove = Guard.walk(map.guard)
-
-    switch history->List.find((((x_, y_), dir_)) => x_ == x && y_ == y && dir_ == dir) {
-    | Some(_) => true
-    | _ =>
-      switch (Map.boundaryCheck(map, nextMove), Map.isWall(map, nextMove)) {
-      | (false, _) => false
-      | (_, true) => loopCheck(newHistory, Map.updateGuard(map, ((x, y), Direction.turnRight(dir))))
-      | (_, false) => loopCheck(newHistory, Map.updateGuard(map, (nextMove, dir)))
-      }
-    }
+    let (nx, ny) = nextMove
+    Map.get(history, nx)
+    ->Option.flatMap(h => Map.get(h, ny))
+    ->Option.flatMap(h => List.find(h, x => x == dir))
+    ->Option.isNone
+      ? World.boundaryCheck(map, nextMove)
+          ? loopCheck(
+              Map_.update(
+                history,
+                x,
+                Map.get(history, x)->Option.mapOr(Map.fromArray([(y, list{dir})]), xh =>
+                  Map_.update(
+                    xh,
+                    y,
+                    Map.get(xh, y)->Option.mapOr(list{dir}, yh => List.add(yh, dir)),
+                  )
+                ),
+              ),
+              World.updateGuard(
+                map,
+                World.isWall(map, nextMove) ? Guard.turn(map.guard) : (nextMove, dir),
+              ),
+            )
+          : false
+      : true
   }
 
   data
-  ->Map.fromString
+  ->World.fromString
   ->Option.mapOr(0, map => {
-    Map.empty(data)
-    ->Array.map(x => Map.updateWall(map, x))
+    World.empty(data)
+    ->Array.map(x => World.updateWall(map, x))
     ->Array.filterWithIndex((x, i) => {
       Js.log(`${i->Int.toString}\r`)
-      loopCheck(list{}, x)
+      loopCheck(Map.fromArray([]), x)
     })
     ->Array.length
   })
