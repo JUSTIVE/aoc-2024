@@ -34,6 +34,7 @@ module Guard = {
 
 module World = {
   type t = {
+    // walls: Map.t<int,Map.t<int,string>>,
     walls: array<((int, int), string)>,
     height: int,
     width: int,
