@@ -86,3 +86,12 @@ module String_ = {
     ->Array.filterMap(x => Option.flatMap(x, Int_.parse))
     ->List.fromArray
 }
+
+module Js_ = {
+  module Dict = {
+    let update = (d, k, v) => {
+      d->Js.Dict.set(k, v)
+      d
+    }
+  }
+}

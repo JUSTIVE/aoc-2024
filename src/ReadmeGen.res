@@ -2,39 +2,70 @@
 open Utilities
 
 module NameMap = {
-  type t = Js.Dict.t<Js.Dict.t<string>>
-  let get = async (year, day) => {
+  type t = Dict.t<Dict.t<string>>
+
+  let fromFileCache = async (): option<t> => {
     let cachedMap = switch Fs.readFileSync("nameMap.json")->Buffer.toString->JSON.parseExn {
     | Object(o) => Some(o)
     | _ => None
-    }
-
-    switch cachedMap
-    ->Option.flatMap(c =>
-      switch c->Js.Dict.get(year) {
-      | Some(Object(o)) => Some(o)
-      | _ => None
-      }
+    }->Option.map(v =>
+      v
+      ->Js.Dict.entries
+      ->Array.filterMap(((k, v)) =>
+        switch v {
+        | Object(o) =>
+          Some((
+            k,
+            o
+            ->Js.Dict.entries
+            ->Array.filterMap(
+              ((kk, vv)) => {
+                switch vv {
+                | String(s) => Some((kk, s))
+                | _ => None
+                }
+              },
+            )
+            ->Js.Dict.fromArray,
+          ))
+        | _ => None
+        }
+      )
+      ->Array.reduce(Js.Dict.empty(), (acc, (k, v)) => {
+        acc->Js_.Dict.update(k, v)
+      })
     )
-    ->Option.flatMap(y =>
-      switch y->Js.Dict.get(day) {
-      | Some(String(s)) => Some(s)
-      | _ => None
-      }
-    ) {
+    cachedMap
+  }
+
+  let updateCache = (map: t, year, day, name) => {
+    let year_ = map->Dict.get(year)->Option.getOr(Js.Dict.empty())
+    map->Js_.Dict.update(year, year_->Js_.Dict.update(day, name))
+  }
+
+  let get = (t, year, day) => {
+    t->Js.Dict.get(year)->Option.flatMap(y => y->Js.Dict.get(day))
+  }
+
+  let get = async (year, day) => {
+    let cachedMap = await fromFileCache()
+
+    switch cachedMap->Option.flatMap(c => get(c, year, day)) {
     | Some(name) => name
     | None =>
-      (await (await fetch(`https://adventofcode.com/${year}/day/${day}`))
-      ->Response.text)
-      ->String.match(%re("/Day \d:\s(.*)\s?---/"))
-      ->Option.flatMap(x => x->Array.at(1))
-      ->Option.flatMap(identity)
-      ->Option.getOr("")
+      Js.log(`fetching ${year} ${day}`)
+      let name =
+        (await (await fetch(`https://adventofcode.com/${year}/day/${day}`))
+        ->Response.text)
+        ->String.match(%re("/Day \d:\s(.*)\s?---/"))
+        ->Option.flatMap(x => x->Array.at(1))
+        ->Option.flatMap(identity)
+        ->Option.getOr("")
+
+      name
     }
   }
 }
-
-// (await NameMap.get("2024", "6"))->Js.log
 
 module Problem = {
   type t = {
@@ -95,8 +126,6 @@ module Problem = {
   }
 }
 
-// (await Problem.fromFileNameAsync("src/2024/Day1_2024.res"))->Js.log
-
 module Year = {
   type t = {
     year: int,
@@ -115,10 +144,9 @@ ${problems
   }
 
   let fromDirNameAsync = async dirName => {
-    let year = dirName->Int_.parse->monitor
+    let year = dirName->Int_.parse
     let problems =
       (await Fs.readdirSync(`src/${dirName}`)
-      ->monitor
       ->Array.filter(x => x->String.endsWith(".res"))
       ->Array.map(x => Problem.fromFileNameAsync(x, year))
       ->Promise.allSettled)
@@ -128,33 +156,47 @@ ${problems
         | _ => None
         }
       )
-      ->monitor
 
     switch year {
     | Some(year) => Some(make(year, problems))
     | _ => None
     }
   }
+
+  let toDict = y => {
+    y.problems->Array.reduce(Js.Dict.empty(), (acc, cur) => {
+      acc->Js_.Dict.update(cur.day->Int.toString, cur.name)
+    })
+  }
 }
 
-let content =
-  (await Fs.readdirSync("src")
-  ->Array.filterMap(Int_.parse)
-  ->Array.map(Int_.toString)
-  ->monitor
-  ->Array.map(x => Year.fromDirNameAsync(x))
-  ->monitor
-  ->Promise.allSettled)
-  ->Array.filterMap(x =>
-    switch x {
-    | Fulfilled(y) => y.value
-    | _ => None
-    }
-  )
-  ->monitor
+let content = {
+  let years =
+    (await Fs.readdirSync("src")
+    ->Array.filterMap(Int_.parse)
+    ->Array.map(Int_.toString)
+    ->Array.map(x => Year.fromDirNameAsync(x))
+    ->Promise.allSettled)
+    ->Array.filterMap(x =>
+      switch x {
+      | Fulfilled(y) => y.value
+      | _ => None
+      }
+    )
+
+  years
+  ->Array.reduce(Js.Dict.empty(), (acc, year) => {
+    acc->Js_.Dict.update(year.year->Int.toString, Year.toDict(year))
+  })
+  ->JSON.stringifyAny
+  ->Option.map(x => Fs.writeFileSync("nameMap.json", x->Buffer.fromString))
+  ->ignore
+
+  years
   ->Array.map(Year.toMarkdown)
   ->Array.join("\n\n")
   ->(x => `# aoc\n\n${x}`)
+}
 
 (
   await RescriptBun.Bun.Write.write(
