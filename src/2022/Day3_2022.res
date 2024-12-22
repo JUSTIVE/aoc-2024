@@ -22,6 +22,7 @@ let q1 = data => {
     ->Array_.Int.sum
   })
   ->Array_.Int.sum
+  ->Int.toString
 }
 
 // evalChar('z')->Js.log

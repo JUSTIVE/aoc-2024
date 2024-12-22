@@ -83,6 +83,7 @@ let solve = (data, considerDo) =>
   ->tokenize
   ->parse
   ->eval((0, {do: true, considerDo}))
+  ->Int.toString
 
 let q1 = data => solve(data, false)
 

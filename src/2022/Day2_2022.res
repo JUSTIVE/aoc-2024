@@ -18,6 +18,7 @@ let q1 = data =>
   String.split(data, "\n")
   ->Array.map(parseLine)
   ->Array_.Int.sum
+  ->Int.toString
 
 let transformer = str =>
   switch str {
@@ -38,3 +39,4 @@ let q2 = data =>
   ->Array.map(transformer)
   ->Array.map(parseLine)
   ->Array_.Int.sum
+  ->Int.toString

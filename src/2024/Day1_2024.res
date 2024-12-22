@@ -18,11 +18,14 @@ let q1 = data => {
   ->Tuple2_.toList
   ->List.map(Tuple2_.Int.diffAbs)
   ->List_.Int.sum
+  ->Int.toString
 }
 
 let q2 = data => {
   let (lista, listb) = parseFile(data)
   let listBCounts = List_.histogram(listb)->Map_.map(List.length)
 
-  List.filterMap(lista, x => Map.get(listBCounts, x)->Option.map(y => x * y))->List_.Int.sum
+  List.filterMap(lista, x => Map.get(listBCounts, x)->Option.map(y => x * y))
+  ->List_.Int.sum
+  ->Int.toString
 }

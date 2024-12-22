@@ -88,6 +88,7 @@ let q1 = data => {
   })
   ->Array.filterMap(Case.selectMiddleValue)
   ->Array_.Int.sum
+  ->Int.toString
 }
 
 let q2 = data => {
@@ -97,4 +98,5 @@ let q2 = data => {
   ->Array.map(x => x->Case.fix(rules))
   ->Array.filterMap(Case.selectMiddleValue)
   ->Array_.Int.sum
+  ->Int.toString
 }

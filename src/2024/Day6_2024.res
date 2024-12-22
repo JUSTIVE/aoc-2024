@@ -110,6 +110,7 @@ let q1 = data => {
     ->Set.fromArray
     ->Set.size
   )
+  ->Int.toString
 }
 
 let q2 = data => {
@@ -157,4 +158,5 @@ let q2 = data => {
     })
     ->Array.length
   })
+  ->Int.toString
 }

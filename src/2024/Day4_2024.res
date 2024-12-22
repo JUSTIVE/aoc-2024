@@ -28,9 +28,9 @@ let q1 = data => {
       ),
     ]
 
-  [...Array.toReversed(patGen("X", "M", "A", "S")), ...patGen("S", "A", "M", "X")]->run(
-    data->flattenData,
-  )
+  [...Array.toReversed(patGen("X", "M", "A", "S")), ...patGen("S", "A", "M", "X")]
+  ->run(data->flattenData)
+  ->Int.toString
 }
 
 let q2 = data => {
@@ -47,5 +47,7 @@ let q2 = data => {
     patGen(("S", "M", "S", "M")),
     patGen(("S", "S", "M", "M")),
     patGen(("M", "S", "M", "S")),
-  ]->run(data->flattenData)
+  ]
+  ->run(data->flattenData)
+  ->Int.toString
 }

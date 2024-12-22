@@ -25,10 +25,11 @@ let runner = async (year, day, problem, session) => {
     | (5, 2) => Some(Day5_2024.q2)
     | (6, 1) => Some(Day6_2024.q1)
     | (6, 2) => Some(Day6_2024.q2)
+    | (7, 1) => Some(Day7_2024.q1)
     | _ => None
     }
   | _ => None
-  }->Option.mapOr("Invalid day or problem", x => x(data)->Int_.toString)
+  }->Option.mapOr("Invalid day or problem", x => x(data))
 }
 
 let driver = async arg =>
@@ -39,6 +40,12 @@ let driver = async arg =>
   | _ => "Invalid argument"
   }
 
+let start = performance.now()
+
 (await Array.at(argv(process), 2)
 ->Option.mapOr(Promise.make((resolve, _) => resolve("No argument provided")), driver))
 ->Js.log
+
+let end = performance.now()
+
+Js.log(`Execution time: ${(end -. start)->Float.toString}ms`)

@@ -35,6 +35,12 @@ module Array_ = {
     let sortAsc = a => Array.toSorted(a, Core__Int.compare)
     let sortDesc = a => sortAsc(a)->Array.toReversed
   }
+  module Float = {
+    let sum = a => Array.reduce(a, 0., (a, b) => a +. b)
+  }
+  module BigInt = {
+    let sum = a => Array.reduce(a, 0n, (a, b) => Core__BigInt.add(a, b))
+  }
   let reject = (a, f) => Array.filter(a, x => !f(x))
 }
 
@@ -78,6 +84,10 @@ module Tuple2_ = {
 module Int_ = {
   let parse = x => Int.fromString(x, ~radix=10)
   let toString = x => Int.toString(x, ~radix=10)
+}
+
+module Float_ = {
+  let parse = x => Float.fromString(x)
 }
 
 module String_ = {

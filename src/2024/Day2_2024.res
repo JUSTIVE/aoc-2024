@@ -19,6 +19,7 @@ let q1 = data => {
   parseFile(data)
   ->Array.filter(checkCase)
   ->Array.length
+  ->Int.toString
 }
 
 let q2 = data => {
@@ -30,4 +31,5 @@ let q2 = data => {
   )
   ->Tuple2_.map(List.length)
   ->Tuple2_.Int.sum
+  ->Int.toString
 }
