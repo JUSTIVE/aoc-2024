@@ -17,24 +17,30 @@ let parse = data =>
     }
   )
 
-let rec solve = (acc, oracle, values) => {
+let rec solve = (acc, oracle, values, useConcat) => {
   oracle >= acc &&
     switch values {
-    | list{h, ...t} => solve(acc +. h, oracle, t) || solve(acc *. h, oracle, t)
+    | list{h, ...t} =>
+      solve(acc +. h, oracle, t, useConcat) ||
+      solve(acc *. h, oracle, t, useConcat) ||
+      (useConcat &&
+      solve(acc *. Math.pow(10., ~exp=Math.floor(Math.log10(h)) +. 1.) +. h, oracle, t, useConcat))
     | _ => acc == oracle
     }
 }
 
-let q1 = data => {
+let run = (data, useConcat) =>
   data
   ->parse
   ->Array.filterMap(((oracle, values)) => {
     switch values->List.fromArray {
-    | list{h, ...t} => solve(h, oracle, t) ? Some(oracle) : None
+    | list{h, ...t} => solve(h, oracle, t, useConcat) ? Some(oracle) : None
     | _ => None
     }
   })
-  ->monitor
   ->Array_.Float.sum
   ->Float.toString
-}
+
+let q1 = data => run(data, false)
+
+let q2 = data => run(data, true)

@@ -26,6 +26,7 @@ let runner = async (year, day, problem, session) => {
     | (6, 1) => Some(Day6_2024.q1)
     | (6, 2) => Some(Day6_2024.q2)
     | (7, 1) => Some(Day7_2024.q1)
+    | (7, 2) => Some(Day7_2024.q2)
     | _ => None
     }
   | _ => None
