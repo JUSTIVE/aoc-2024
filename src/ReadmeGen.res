@@ -124,6 +124,8 @@ module Problem = {
         part1,
       )} | ${partPermLink(2, part2)} |`
   }
+
+  let compare = (x, y) => Int.compare(x.day, y.day)
 }
 
 module Year = {
@@ -131,7 +133,7 @@ module Year = {
     year: int,
     problems: array<Problem.t>,
   }
-  let make = (year, problems) => {year, problems}
+  let make = (year, problems) => {year, problems: problems->Array.toSorted(Problem.compare)}
 
   let toMarkdown = ({year, problems}: t) => {
     `## ${year->Int.toString}
@@ -168,6 +170,8 @@ ${problems
       acc->Js_.Dict.update(cur.day->Int.toString, cur.name)
     })
   }
+
+  let compare = (x, y) => Int.compare(x.year, y.year)
 }
 
 let content = {
@@ -193,6 +197,7 @@ let content = {
   ->ignore
 
   years
+  ->Array.toSorted(Year.compare)
   ->Array.map(Year.toMarkdown)
   ->Array.join("\n\n")
   ->(x => `# aoc\n\n${x}`)
