@@ -42,6 +42,21 @@ module Array_ = {
     let sum = a => Array.reduce(a, 0n, (a, b) => Core__BigInt.add(a, b))
   }
   let reject = (a, f) => Array.filter(a, x => !f(x))
+  let dropWhile = (a, f) => {
+    let res = ref([])
+    let flaggd = ref(false)
+    Array.forEach(a, x => {
+      switch f(x) {
+      | Some(_) => res.contents->Array.push(x)
+      | None =>
+        if flaggd.contents {
+          res.contents->Array.push(x)
+        }
+        flaggd.contents = true
+      }
+    })
+    res.contents
+  }
 }
 
 module List_ = {
@@ -95,6 +110,9 @@ module String_ = {
     String.splitByRegExp(x, %re("/\s+/"))
     ->Array.filterMap(x => Option.flatMap(x, Int_.parse))
     ->List.fromArray
+  let updateAt = (s, i, v) => {
+    s->String.substring(~start=0, ~end=i) ++ v ++ s->String.substringToEnd(~start=i + 1)
+  }
 }
 
 module Js_ = {
